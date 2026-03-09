@@ -2,42 +2,87 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Verificar Certificado</title>
+<title>Verificación de Certificados</title>
 
 <style>
+
 body{
-font-family: Arial;
-background:#f2f2f2;
-text-align:center;
-margin-top:100px;
+font-family: Arial, sans-serif;
+background:linear-gradient(135deg,#2b7cff,#00c6ff);
+height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+margin:0;
 }
 
 .container{
 background:white;
-padding:30px;
-width:350px;
-margin:auto;
-border-radius:10px;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
+padding:40px;
+width:380px;
+border-radius:12px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+text-align:center;
+}
+
+h2{
+margin-top:0;
+color:#333;
 }
 
 input{
-padding:10px;
-width:80%;
-margin:10px;
+width:85%;
+padding:12px;
+margin-top:15px;
+border-radius:6px;
+border:1px solid #ccc;
+font-size:16px;
 }
 
 button{
-padding:10px 20px;
+margin-top:15px;
+padding:12px 25px;
+border:none;
 background:#2b7cff;
 color:white;
-border:none;
+font-size:16px;
+border-radius:6px;
 cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+background:#1a5ed8;
 }
 
 #resultado{
-margin-top:20px;
+margin-top:25px;
+font-size:16px;
 }
+
+.ok{
+color:#28a745;
+font-weight:bold;
+}
+
+.error{
+color:red;
+}
+
+.descargar{
+display:inline-block;
+margin-top:10px;
+padding:10px 20px;
+background:#28a745;
+color:white;
+text-decoration:none;
+border-radius:6px;
+}
+
+.descargar:hover{
+background:#1f8a37;
+}
+
 </style>
 
 </head>
@@ -46,11 +91,11 @@ margin-top:20px;
 
 <div class="container">
 
-<h2>Consulta tu Certificado</h2>
+<h2>Verificación de Certificados</h2>
 
-<p>Ingresa tu CI</p>
+<p>Ingrese su número de CI</p>
 
-<input type="text" id="ci">
+<input type="text" id="ci" placeholder="Ej: 7212809">
 
 <br>
 
@@ -62,42 +107,63 @@ margin-top:20px;
 
 <script>
 
-const url = "https://docs.google.com/spreadsheets/d/1eloUZmSntFVkewP9cUGs4lWVmPqmBXYluLqPmkhQzBo/pub?output=csv";
-
+const url = "https://docs.google.com/spreadsheets/d/1eloUZmSntFVkewP9cUGs4lWVmPqmBXYluLqPmkhQzBo/export?format=csv";
 async function buscar(){
 
-let ci = document.getElementById("ci").value.trim();
+let ci=document.getElementById("ci").value.trim().replace(/\s/g,'');
 
-let response = await fetch("https://corsproxy.io/?" + url);
-let data = await response.text();
+if(ci===""){
+document.getElementById("resultado").innerHTML="<span class='error'>Ingrese su CI</span>";
+return;
+}
 
-let filas = data.split("\n");
+document.getElementById("resultado").innerHTML="Buscando certificado...";
 
-let encontrado = false;
+try{
+
+let response=await fetch("https://corsproxy.io/?"+url);
+let data=await response.text();
+
+let filas=data.split("\n");
+
+let encontrado=false;
 
 for(let i=1;i<filas.length;i++){
 
-let columnas = filas[i].split(",");
+let columnas=filas[i].split(",");
 
-let ciTabla = columnas[0];
-let link = columnas[1];
+let ciTabla=columnas[0].replace(/"/g,'').trim();
+let link=columnas[1].replace(/"/g,'');
 
-if(ci == ciTabla){
+if(ci===ciTabla){
 
-document.getElementById("resultado").innerHTML =
-`<a href="${link}" target="_blank">Descargar Certificado</a>`;
+document.getElementById("resultado").innerHTML=
+`
+<div class="ok">✔ Certificado válido encontrado</div>
 
-encontrado = true;
+<a class="descargar" href="${link}" target="_blank">
+Descargar Certificado
+</a>
+`;
 
+encontrado=true;
 break;
+
 }
 
 }
 
 if(!encontrado){
 
-document.getElementById("resultado").innerHTML =
-"No se encontró certificado";
+document.getElementById("resultado").innerHTML=
+"<span class='error'>No se encontró certificado</span>";
+
+}
+
+}catch(error){
+
+document.getElementById("resultado").innerHTML=
+"<span class='error'>Error consultando la base de datos</span>";
 
 }
 
