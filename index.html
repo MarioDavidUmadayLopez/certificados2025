@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Verificar Certificado</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f2f2f2;
+text-align:center;
+margin-top:100px;
+}
+
+.container{
+background:white;
+padding:30px;
+width:350px;
+margin:auto;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+input{
+padding:10px;
+width:80%;
+margin:10px;
+}
+
+button{
+padding:10px 20px;
+background:#2b7cff;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+#resultado{
+margin-top:20px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Consulta tu Certificado</h2>
+
+<p>Ingresa tu CI</p>
+
+<input type="text" id="ci">
+
+<br>
+
+<button onclick="buscar()">Buscar</button>
+
+<div id="resultado"></div>
+
+</div>
+
+<script>
+
+const url = "https://docs.google.com/spreadsheets/d/1eloUZmSntFVkewP9cUGs4lWVmPqmBXYluLqPmkhQzBo/pub?output=csv";
+
+async function buscar(){
+
+let ci = document.getElementById("ci").value.trim();
+
+let response = await fetch("https://corsproxy.io/?" + url);
+let data = await response.text();
+
+let filas = data.split("\n");
+
+let encontrado = false;
+
+for(let i=1;i<filas.length;i++){
+
+let columnas = filas[i].split(",");
+
+let ciTabla = columnas[0];
+let link = columnas[1];
+
+if(ci == ciTabla){
+
+document.getElementById("resultado").innerHTML =
+`<a href="${link}" target="_blank">Descargar Certificado</a>`;
+
+encontrado = true;
+
+break;
+}
+
+}
+
+if(!encontrado){
+
+document.getElementById("resultado").innerHTML =
+"No se encontró certificado";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
