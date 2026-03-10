@@ -121,10 +121,10 @@ document.getElementById("resultado").innerHTML="Buscando certificado...";
 
 try{
 
-let response=await fetch("https://corsproxy.io/?"+url);
+let response=await fetch(url);
 let data=await response.text();
 
-let filas=data.split("\n");
+let filas=data.split(/\r?\n/);
 
 let encontrado=false;
 
